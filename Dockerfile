@@ -2,8 +2,8 @@ FROM node:10-alpine
 
 ENV APP_DIR /shipyard
 
-VOLUME [ ${APP_DIR} ]
-
 WORKDIR ${APP_DIR}
+
+EXPOSE 3000
 
 CMD [ "/bin/sh" ]
