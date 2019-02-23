@@ -3,6 +3,8 @@ import ReactDOM from "react-dom";
 import { DatePicker, message } from "antd";
 import "antd/dist/antd.css";
 
+import Terminal from "./Terminal.jsx";
+
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -20,12 +22,7 @@ class App extends React.Component {
   render() {
     const { date } = this.state;
     return (
-      <div style={{ width: 400, margin: "100px auto" }}>
-        <DatePicker onChange={this.handleChange.bind(this)} />
-        <div style={{ marginTop: 20 }}>
-          Selected Date: {date ? date.format("YYYY-MM-DD") : "None"}
-        </div>
-      </div>
+      <Terminal imageName="missingls"/>
     );
   }
 }
