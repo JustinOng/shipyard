@@ -4,6 +4,8 @@ import { DatePicker, message } from "antd";
 import "antd/dist/antd.css";
 
 import Terminal from "./Terminal.jsx";
+import "xterm/dist/xterm.css";
+import "xterm/dist/xterm.js";
 
 class App extends React.Component {
   constructor(props) {

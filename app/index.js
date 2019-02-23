@@ -7,7 +7,6 @@ const config = require("config");
 
 const app = express();
 
-app.use("/xterm", express.static(path.join(__dirname, "../node_modules/xterm/dist/")));
 app.use("/", express.static(path.join(__dirname, "../dist"), {
   index: "index.html"
 }));
