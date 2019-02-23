@@ -24,9 +24,6 @@ async function startContainer() {
     stderr: true
   });
 
-  await container.start();
-  console.log(`Started container id=${container.id}`);
-
   containers[container.id] = {
     id: container.id,
     container,
@@ -37,6 +34,9 @@ async function startContainer() {
   ttyStream.on("data", (data) => {
     containers[container.id].logs += data;
   });
+
+  await container.start();
+  console.log(`Started container id=${container.id}`);
 
   return containers[container.id];
 }

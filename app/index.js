@@ -19,6 +19,10 @@ const wss = new WebSocket.Server({ server });
 wss.on("connection", async (ws, req) => {
   const container = await docker.startContainer();
 
+  // send data that was already transmitted before this socket
+  // was opened
+  ws.send(container.logs);
+
   // bind data from terminal to websocket
   function ttyListener(data) {
     ws.send(data.toString("utf8"));
