@@ -3,6 +3,7 @@ const http = require("http");
 const WebSocket = require("ws");
 const express = require("express");
 const docker = require("./docker");
+const challenges = require("./challenges");
 const config = require("config");
 
 const app = express();
@@ -10,6 +11,10 @@ const app = express();
 app.use("/", express.static(path.join(__dirname, "../dist"), {
   index: "index.html"
 }));
+
+app.get("/challenges", (req, res) => {
+  res.send(JSON.stringify(challenges.sanitised));
+});
 
 const server = http.createServer(app);
 

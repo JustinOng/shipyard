@@ -1,0 +1,18 @@
+{
+  "categories": [
+    {
+      "name": "category_a",
+      "humanName": "Category A",
+      "challenges": [{
+        "name": "missinglist",
+        "humanName": "Missing List",
+        "images": [
+          {
+            "name": "missingls",
+            "network": false
+          }
+        ]
+      }]
+    }
+  ]
+}
