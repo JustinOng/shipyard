@@ -17,7 +17,13 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 wss.on("connection", async (ws, req) => {
-  const container = await docker.startContainer();
+  // placeholder for image whitelisting
+  if (req.url !== "/missingls") {
+    ws.close();
+    return;
+  }
+
+  const container = await docker.startContainer(req.url.substring(1));
 
   // send data that was already transmitted before this socket
   // was opened
