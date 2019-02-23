@@ -7,9 +7,9 @@ const docker = new Docker({
 
 const containers = {};
 
-async function startContainer() {
+async function startContainer(imageName) {
   const container = await docker.createContainer({
-    Image: "test",
+    Image: imageName,
     AttachStdin: true,
     AttachStdout: true,
     AttachStderr: true,
@@ -36,7 +36,7 @@ async function startContainer() {
   });
 
   await container.start();
-  console.log(`Started container id=${container.id}`);
+  console.log(`Started container image=${imageName} id=${container.id}`);
 
   return containers[container.id];
 }
