@@ -7,7 +7,7 @@ const docker = new Docker({
 
 const containers = {};
 
-async function createContainer() {
+async function startContainer() {
   const container = await docker.createContainer({
     Image: "test",
     AttachStdin: true,
@@ -41,7 +41,7 @@ async function createContainer() {
   return containers[container.id];
 }
 
-async function removeContainer(id) {
+async function stopContainer(id) {
   if(!(id in containers)) {
     throw new Error("Invalid container id");
   }
@@ -54,7 +54,20 @@ async function removeContainer(id) {
   delete containers[id];
 }
 
+let exiting = false;
+process.on("SIGINT", async () => {
+  if (exiting) return;
+  exiting = true;
+  
+  for (const container of Object.values(containers)) {
+    console.log(`Terminating container id=${container.id}`);
+    await container.container.remove({ force: true });
+  }
+
+  process.exit(0);
+});
+
 module.exports = {
-  createContainer,
-  removeContainer
+  startContainer,
+  stopContainer
 }

@@ -17,7 +17,7 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 wss.on("connection", async (ws, req) => {
-  const container = await docker.createContainer();
+  const container = await docker.startContainer();
 
   // bind data from terminal to websocket
   function ttyListener(data) {
@@ -32,7 +32,7 @@ wss.on("connection", async (ws, req) => {
   });
 
   ws.on("close", () => {
-    docker.removeContainer(container.id);
+    docker.stopContainer(container.id);
     container.tty.removeListener("data", ttyListener);
   });
 });
