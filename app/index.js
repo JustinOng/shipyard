@@ -2,8 +2,7 @@ const path = require("path");
 const http = require("http");
 const WebSocket = require("ws");
 const express = require("express");
-const docker = require("./docker");
-const challenges = require("./challenges");
+const { sanitised: sanitisedChallenges, Challenge } = require("./challenges");
 const config = require("config");
 
 const app = express();
@@ -11,7 +10,7 @@ const app = express();
 app.use("/", express.static(path.join(__dirname, "../dist")));
 
 app.get("/challenges", (req, res) => {
-  res.send(JSON.stringify(challenges.sanitised));
+  res.send(JSON.stringify(sanitisedChallenges));
 });
 
 app.get("*", (request, response) => {
@@ -23,33 +22,23 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 wss.on("connection", async (ws, req) => {
-  // placeholder for image whitelisting
-  if (req.url !== "/missingls") {
-    ws.close();
-    return;
+  const challengeName = req.url.substring(1);
+
+  const challenge = new Challenge(challengeName);
+  const data = await challenge.start();
+
+  // if this challenge involves a console,
+  // bind it to the websocket
+  if (data.tty) {
+    // bind data from the client to tty
+    ws.on("message", (msg) => data.tty.write(msg));
+
+    // bind data from tty to client
+    data.tty.on("data", (msg) => ws.send(msg));
   }
-
-  const container = await docker.startContainer(req.url.substring(1));
-
-  // send data that was already transmitted before this socket
-  // was opened
-  ws.send(container.logs);
-
-  // bind data from terminal to websocket
-  function ttyListener(data) {
-    ws.send(data.toString("utf8"));
-  }
-
-  container.tty.on("data", ttyListener);
-
-  // bind data from websocket to terminal
-  ws.on("message", (msg) => {
-    container.tty.write(msg);
-  });
 
   ws.on("close", () => {
-    docker.stopContainer(container.id);
-    container.tty.removeListener("data", ttyListener);
+    challenge.stop();
   });
 });
 

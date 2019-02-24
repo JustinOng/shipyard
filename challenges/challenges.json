@@ -6,8 +6,10 @@
       "icon": "tool",
       "challenges": [{
         "name": "missinglist",
+        "type": "console",
+        "entryPoint": "missingls",
         "humanName": "Missing List",
-        "images": [
+        "services": [
           {
             "name": "missingls",
             "network": false

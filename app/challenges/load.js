@@ -17,7 +17,7 @@ for (const category of configVal.categories) {
   for (const challenge of sanitised[category.name].challenges) {
     challenges[challenge.name] = { ...challenge };
     for (const key of Object.keys(challenge)) {
-      if (["images"].indexOf(key) > -1) {
+      if (["services", "entryPoint"].indexOf(key) > -1) {
         delete challenge[key];
       }
     }
