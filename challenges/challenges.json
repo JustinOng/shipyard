@@ -1,8 +1,9 @@
 {
   "categories": [
     {
-      "name": "category_a",
-      "humanName": "Category A",
+      "name": "sysadmin",
+      "humanName": "System Administration",
+      "icon": "tool",
       "challenges": [{
         "name": "missinglist",
         "humanName": "Missing List",

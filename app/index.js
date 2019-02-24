@@ -8,12 +8,14 @@ const config = require("config");
 
 const app = express();
 
-app.use("/", express.static(path.join(__dirname, "../dist"), {
-  index: "index.html"
-}));
+app.use("/", express.static(path.join(__dirname, "../dist")));
 
 app.get("/challenges", (req, res) => {
   res.send(JSON.stringify(challenges.sanitised));
+});
+
+app.get("*", (request, response) => {
+  response.sendFile(path.resolve(__dirname, "../dist/index.html"));
 });
 
 const server = http.createServer(app);
