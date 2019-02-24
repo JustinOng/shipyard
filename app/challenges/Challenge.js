@@ -30,7 +30,7 @@ class Challenge {
         options["attach"] = true;
       }
 
-      return docker.startContainer(service.name, options);
+      return docker.startService(service.name, options);
     }));
 
     if (this.type === "console") {
@@ -43,7 +43,7 @@ class Challenge {
   }
 
   async stop() {
-    return Promise.all(this.services.map((service) => docker.stopContainer(service.containerId)));
+    return Promise.all(this.services.map((service) => docker.stopContainer(service.id)));
   }
 };
 

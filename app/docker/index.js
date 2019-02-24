@@ -7,7 +7,7 @@ const docker = new Docker({
 
 const containers = {};
 
-async function startContainer(imageName, inputOptions) {
+async function startService(imageName, inputOptions) {
   /*
     input:
     imageName: name of image
@@ -81,7 +81,7 @@ async function startContainer(imageName, inputOptions) {
   return output;
 }
 
-async function stopContainer(id) {
+async function stopService(id) {
   if (!(id in containers)) {
     throw new Error("Invalid container id");
   }
@@ -111,6 +111,6 @@ process.on("SIGINT", async () => {
 });
 
 module.exports = {
-  startContainer,
-  stopContainer
+  startService,
+  stopService,
 };
