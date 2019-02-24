@@ -1,6 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { Terminal as Xterm } from "xterm";
+
+import "xterm/dist/xterm.css";
+import "xterm/dist/xterm.js";
+
 import * as attach from "xterm/lib/addons/attach/attach";
 
 // built with reference to
@@ -26,11 +30,11 @@ class Terminal extends React.Component {
     this.socket.onopen = () => {
       console.log("Socket opened");
       this.term.attach(this.socket);
-    }
+    };
 
     this.socket.onclose = () => {
       console.warn("Socket terminated by server");
-    }
+    };
   }
 
   componentWillUnmount() {
@@ -53,7 +57,7 @@ class Terminal extends React.Component {
   render() {
     return <div ref={(ref) => {
       this.container = ref;
-    }}/>
+    }}/>;
   }
 }
 
