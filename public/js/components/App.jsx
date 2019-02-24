@@ -89,13 +89,13 @@ class App extends React.Component {
                 path: `/${categoryName}`,
                 breadcrumbName: this.state.challenges[categoryName].humanName
               });
-              
+
               // ensure that challenge is valid
               // a little more complex because challenge is an array, not dict
               const foundChallenge = this.state.challenges[categoryName].challenges.filter((c) => {
                 return c.name === challengeName;
               });
-  
+
               if (foundChallenge.length) {
                 routes.push({
                   path: challengeName,

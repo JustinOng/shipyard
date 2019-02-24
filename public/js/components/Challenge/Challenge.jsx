@@ -12,7 +12,6 @@ class Challenge extends React.Component {
   }
 
   render() {
-    console.log(this.props);
     return (
       <div>
         <Terminal challengeName={ this.props.challengeName }/>

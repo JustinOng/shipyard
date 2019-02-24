@@ -19,39 +19,60 @@ class Terminal extends React.Component {
     this.state = {};
   }
 
-  componentDidMount() {
+  setupTerminal() {
+    const { challengeName } = this.props;
+
     this.term = new Xterm();
     this.term.open(this.container);
     this.term.setOption("cursorStyle", "block");
 
-    this.socket = new WebSocket(`ws://${location.host}/${this.props.challengeName}`);
+    this.socket = new WebSocket(`ws://${location.host}/${challengeName}`);
 
-    console.log(`Opening socket for image ${this.props.challengeName}`);
-    this.socket.onopen = () => {
+    console.log(`Opening socket for image ${challengeName}`);
+    this.socket.addEventListener("open", () => {
       console.log("Socket opened");
       this.term.attach(this.socket);
-    };
+    });
 
-    this.socket.onclose = () => {
-      console.warn("Socket closed");
-    };
+    this.socket.addEventListener("close", () => {
+      console.warn(`Socket url=${this.socket.url} closed`);
+    });
+  }
+
+  destroyTerminal() {
+    return new Promise((resolve) => {
+      if (this.term) {
+        this.term.destroy();
+        this.term = null;
+      }
+
+      console.warn(`Closing socket url=${this.socket.url}`);
+      this.socket.close();
+      this.socket.addEventListener("close", resolve);
+    });
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.challengeName !== prevProps.challengeName) {
+      console.log("Change in challenge, reattaching terminal");
+      this.destroyTerminal().then(() => {
+        this.setupTerminal();
+      });
+    }
+  }
+
+  componentDidMount() {
+    this.setupTerminal();
+    window.term = this.term;
   }
 
   componentWillUnmount() {
-    if (this.term) {
-      this.term.destroy();
-      this.term = null;
-    }
-
-    // check if ws is not CLOSING or CLOSED
-    // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
-    if (this.socket.readyState < 2) {
-      console.log("Terminal component being unmounted, closing socket");
-      this.socket.close();
-    }
+    console.log("Terminal unmounting");
+    this.destroyTerminal();
   }
 
-  shouldComponentUpdate() {
+  shouldComponentUpdate(nextProps) {
+    if (this.props.challengeName !== nextProps.challengeName) return true;
     return false;
   }
 
