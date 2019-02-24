@@ -17,33 +17,69 @@ class Challenge {
     this.type = challenge.type;
     this.entryPoint = challenge.entryPoint;
 
+    this.networks = {};
+    this.services = [];
+
     this.serviceConfig = challenge.services;
+    this.networkConfig = challenge.networks;
   }
 
   async start() {
+    const output = {};
+
+    if (this.networkConfig && this.networkConfig.length) {
+      const networks = await Promise.all(this.networkConfig.map((network) => {
+        return docker.createNetwork(`${network.name}-${this.id}`, network.options);
+      }));
+
+      this.networks = {};
+      for (const network of networks) {
+        this.networks[network.name] = network;
+      }
+    } else {
+      this.networks = {};
+    }
+
     this.services = await Promise.all(this.serviceConfig.map((service) => {
       const options = {
-        network: service.network
+        networks: service.networks
       };
 
       if (this.type === "console" && service.name === this.entryPoint) {
         options["attach"] = true;
       }
 
-      return docker.startService(service.name, options);
+      return docker.startService(service.name, options).then((data) => {
+        Object.assign(service, data);
+        return service;
+      });
     }));
 
-    if (this.type === "console") {
-      for (const service of this.services) {
+    for (const service of this.services) {
+      if (this.type === "console" && service.tty) {
         this.tty = service.tty;
+        output.tty = this.tty;
+      }
 
-        return { tty: this.tty };
+      if (service.networks) {
+        for (const network of service.networks) {
+          const fullNetworkName = `${network}-${this.id}`;
+          if (!(fullNetworkName in this.networks)) {
+            console.warn(`Unable to find network ${network}`);
+            continue;
+          }
+
+          await docker.connect(service.id, this.networks[fullNetworkName].id);
+        }
       }
     }
+
+    return output;
   }
 
   async stop() {
-    return Promise.all(this.services.map((service) => docker.stopContainer(service.id)));
+    await Promise.all(this.services.map(({ id }) => docker.stopService(id)));
+    await Promise.all(Object.values(this.networks).map(({ id }) => docker.removeNetwork(id)));
   }
 };
 

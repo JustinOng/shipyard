@@ -5,7 +5,16 @@ const docker = new Docker({
   socketPath: config.docker.socketPath
 });
 
+// retrieve id of the builtin"none" network for later removal from containers
+const networkNonePromise = docker.listNetworks({
+  name: "none",
+  type: "builtin"
+}).then((networks) => {
+  return docker.getNetwork(networks[0].Id);
+});
+
 const containers = {};
+const networks = {};
 
 async function startService(imageName, inputOptions) {
   /*
@@ -25,9 +34,15 @@ async function startService(imageName, inputOptions) {
   const options = { Image: imageName };
   const output = {};
 
-  if (!inputOptions.network) {
-    options["NetworkDisabled"] = true;
-  }
+  //if (!inputOptions.networks) {
+  // horrible hack:
+  // assign the none network so the container is not joined
+  // to the default bridge network when created.
+  // this none network is later removed because the container
+  // cannot join other networks when its connected to none
+  options["HostConfig"] = {
+    "NetworkMode": "none"
+  };
 
   if (inputOptions.attach) {
     Object.assign(options, {
@@ -40,7 +55,7 @@ async function startService(imageName, inputOptions) {
   }
 
   const container = await docker.createContainer(options);
-  output.containerId = container.id;
+  output.id = container.id;
 
   containers[container.id] = {
     id: container.id,
@@ -73,17 +88,26 @@ async function startService(imageName, inputOptions) {
 
     containers[container.id].tty = ttyStream;
     output.tty = ttyStream;
+    console.log(`Attaching tty stream to id=${container.id}`);
   }
 
   await container.start();
   console.log(`Started container image=${imageName} id=${container.id}`);
+
+  // part of the horrible hack from above to prevent
+  // docker from attaching the default bridge network
+  // but only remove none if the container does have networks
+  if (inputOptions.networks) {
+    const networkNone = await networkNonePromise;
+    await networkNone.disconnect({ Container: container.id });
+  }
 
   return output;
 }
 
 async function stopService(id) {
   if (!(id in containers)) {
-    throw new Error("Invalid container id");
+    throw new Error("Unknown container id");
   }
 
   if ("tty" in containers[id]) {
@@ -97,15 +121,50 @@ async function stopService(id) {
   delete containers[id];
 }
 
+async function createNetwork(name, inputOptions) {
+  const options = {};
+  Object.assign(options, { Name: name }, inputOptions);
+
+  const network = await docker.createNetwork(options);
+  console.log(`Created network name=${name} id=${network.id}`);
+
+  networks[network.id] = network;
+
+  return { name, id: network.id };
+}
+
+async function removeNetwork(id) {
+  if (!(id in networks)) {
+    throw new Error("Unknown network id");
+  }
+
+  await networks[id].remove();
+  console.log(`Removed network id=${id}`);
+
+  delete networks[id];
+}
+
+async function connect(containerId, networkId) {
+  if (!(networkId in networks)) {
+    throw new Error("Unknown network id");
+  }
+
+  if (!(containerId in containers)) {
+    throw new Error("Unknown container id");
+  }
+
+  await networks[networkId].connect({ Container: containerId });
+  console.log(`Connected container id=${containerId} to network id=${networkId}`);
+}
+
 let exiting = false;
 process.on("SIGINT", async () => {
   if (exiting) return;
   exiting = true;
 
   console.log("Terminating containers before exiting...");
-  await Promise.all(
-      Object.keys(containers).map((containerId) => stopContainer(containerId))
-  );
+  await Promise.all(Object.keys(containers).map((id) => stopService(id)));
+  await Promise.all(Object.keys(networks).map((id) => removeNetwork(id)));
 
   process.exit(0);
 });
@@ -113,4 +172,7 @@ process.on("SIGINT", async () => {
 module.exports = {
   startService,
   stopService,
+  createNetwork,
+  removeNetwork,
+  connect
 };
