@@ -4,18 +4,43 @@
       "name": "sysadmin",
       "humanName": "System Administration",
       "icon": "tool",
-      "challenges": [{
-        "name": "missinglist",
-        "type": "console",
-        "entryPoint": "missingls",
-        "humanName": "Missing List",
-        "services": [
-          {
-            "name": "missingls",
-            "network": false
-          }
-        ]
-      }]
+      "challenges": [
+        {
+          "name": "missinglist",
+          "humanName": "Missing List",
+          "type": "console",
+          "entryPoint": "missingls",
+          "services": [
+            {
+              "name": "missingls",
+              "networks": false
+            }
+          ]
+        }, {
+          "name": "nscan",
+          "humanName": "Network Scanning",
+          "type": "console",
+          "entryPoint": "ping:entry",
+          "services": [
+            {
+              "name": "ping:entry",
+              "networks": ["ping"]
+            }, {
+              "name": "ping:target",
+              "networks": ["ping"]
+            }
+          ],
+          "networks": [
+            {
+              "name": "ping",
+              "options": {
+                "Driver": "bridge",
+                "Internal": true
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
