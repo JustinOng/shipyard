@@ -15,7 +15,7 @@ for (const category of configVal.categories) {
   sanitised[category.name] = JSON.parse(JSON.stringify(category));
 
   for (const challenge of sanitised[category.name].challenges) {
-    challenges[challenge.name] = {...challenge};
+    challenges[challenge.name] = { ...challenge };
     for (const key of Object.keys(challenge)) {
       if (["images"].indexOf(key) > -1) {
         delete challenge[key];

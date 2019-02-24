@@ -10,4 +10,4 @@ module.exports = {
   "challenges": {
     "directory": path.resolve(__dirname, "../challenges")
   }
-}
+};

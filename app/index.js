@@ -42,7 +42,7 @@ wss.on("connection", async (ws, req) => {
 
   // bind data from websocket to terminal
   ws.on("message", (msg) => {
-    container.tty.write(msg)
+    container.tty.write(msg);
   });
 
   ws.on("close", () => {
