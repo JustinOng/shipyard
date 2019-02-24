@@ -19,6 +19,12 @@ class Terminal extends React.Component {
     this.state = {};
   }
 
+  propCallback(callbackName, value) {
+    if (typeof this.props[callbackName] === "function") {
+      this.props[callbackName](value);
+    }
+  }
+
   setupTerminal() {
     const { challengeName } = this.props;
 
@@ -29,12 +35,18 @@ class Terminal extends React.Component {
     this.socket = new WebSocket(`ws://${location.host}/${challengeName}`);
 
     console.log(`Opening socket for image ${challengeName}`);
+
+    this.propCallback("onLoadingChange", "LOADING");
+
     this.socket.addEventListener("open", () => {
+      this.propCallback("onLoadingChange", "OPEN");
+
       console.log("Socket opened");
       this.term.attach(this.socket);
     });
 
     this.socket.addEventListener("close", () => {
+      this.propCallback("onLoadingChange", "CLOSED");
       console.warn(`Socket url=${this.socket.url} closed`);
     });
   }
@@ -77,9 +89,11 @@ class Terminal extends React.Component {
   }
 
   render() {
-    return <div ref={(ref) => {
-      this.container = ref;
-    }}/>;
+    return (
+      <div ref={(ref) => {
+        this.container = ref;
+      }}/>
+    );
   }
 }
 
