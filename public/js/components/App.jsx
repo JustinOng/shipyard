@@ -75,30 +75,30 @@ class App extends React.Component {
           </Menu>
         </Sider>
         { // eslint-disable-next-line react/no-children-prop
-        } <Route path="/:category/:challenge" children={({ match }) => {
+        } <Route path="/:categoryName/:challengeName" children={({ match }) => {
           const routes = [{ path: "/", breadcrumbName: "Challenges" }];
 
           // checks whether the category and challenge names are valid
           let validRoute = true;
 
-          const { category, challenge } = match ? match.params : {};
+          const { categoryName, challengeName } = match ? match.params : {};
           if (match) {
             // ensure that category is valid
-            if (category in this.state.challenges) {
+            if (categoryName in this.state.challenges) {
               routes.push({
-                path: `/${category}`,
-                breadcrumbName: this.state.challenges[category].humanName
+                path: `/${categoryName}`,
+                breadcrumbName: this.state.challenges[categoryName].humanName
               });
               
               // ensure that challenge is valid
               // a little more complex because challenge is an array, not dict
-              const foundChallenge = this.state.challenges[category].challenges.filter((c) => {
-                return c.name === challenge;
+              const foundChallenge = this.state.challenges[categoryName].challenges.filter((c) => {
+                return c.name === challengeName;
               });
   
               if (foundChallenge.length) {
                 routes.push({
-                  path: challenge,
+                  path: challengeName,
                   breadcrumbName: foundChallenge[0].humanName
                 });
               } else {
@@ -125,7 +125,7 @@ class App extends React.Component {
               <div style={{ background: "#fff", padding: 24, minHeight: 280 }}>
                 {
                   match && validRoute ?
-                    <Challenge challenge={ challenge }/>
+                    <Challenge challengeName={ challengeName }/>
                     :
                     "Select a challenge on the left to get started!"
                 }
