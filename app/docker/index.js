@@ -7,10 +7,16 @@ const docker = new Docker({
 
 // retrieve id of the builtin"none" network for later removal from containers
 const networkNonePromise = docker.listNetworks({
+  driver: "null",
   name: "none",
   type: "builtin"
 }).then((networks) => {
-  return docker.getNetwork(networks[0].Id);
+  // filter because the query seems to return all networks sometimes?!
+  networks = networks.filter((network) => network.Name === "none");
+  const id = networks[0].Id;
+
+  console.log(`Found network none id=${id}`);
+  return docker.getNetwork(id);
 });
 
 const containers = {};
