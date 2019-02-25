@@ -8,8 +8,7 @@
         {
           "name": "missinglist",
           "humanName": "Missing List",
-          "type": "console",
-          "entryPoint": "missingls",
+          "console": "missingls",
           "services": [
             {
               "name": "missingls",
@@ -19,8 +18,7 @@
         }, {
           "name": "nscan",
           "humanName": "Network Scanning",
-          "type": "console",
-          "entryPoint": "ping:entry",
+          "console": "ping:entry",
           "services": [
             {
               "name": "ping:entry",

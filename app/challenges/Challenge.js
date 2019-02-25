@@ -15,7 +15,7 @@ class Challenge {
 
     this.id = uuidv4();
     this.type = challenge.type;
-    this.entryPoint = challenge.entryPoint;
+    this.console = challenge.console;
 
     this.networks = {};
     this.services = [];
@@ -45,7 +45,7 @@ class Challenge {
         networks: service.networks
       };
 
-      if (this.type === "console" && service.name === this.entryPoint) {
+      if (this.console && service.name === this.console) {
         options["attach"] = true;
       }
 
@@ -56,7 +56,7 @@ class Challenge {
     }));
 
     for (const service of this.services) {
-      if (this.type === "console" && service.tty) {
+      if (this.console && service.tty) {
         this.tty = service.tty;
         output.tty = this.tty;
       }
