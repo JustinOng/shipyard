@@ -37,28 +37,22 @@ async function startService(imageName, inputOptions) {
     }
   */
 
-  const options = { Image: imageName };
-  const output = {};
-
-  //if (!inputOptions.networks) {
-  // horrible hack:
-  // assign the none network so the container is not joined
-  // to the default bridge network when created.
-  // this none network is later removed because the container
-  // cannot join other networks when its connected to none
-  options["HostConfig"] = {
-    "NetworkMode": "none"
+  const options = {
+    Image: imageName,
+    AttachStdin: true,
+    AttachStdout: true,
+    AttachStderr: true,
+    Tty: true,
+    OpenStdin: true,
+    // horrible hack:
+    // assign the none network so the container is not joined
+    // to the default bridge network when created.
+    // this none network is later removed because the container
+    // cannot join other networks when its connected to none
+    HostConfig: { "NetworkMode": "none" }
   };
 
-  if (inputOptions.attach) {
-    Object.assign(options, {
-      AttachStdin: true,
-      AttachStdout: true,
-      AttachStderr: true,
-      Tty: true,
-      OpenStdin: true
-    });
-  }
+  const output = {};
 
   const container = await docker.createContainer(options);
   output.id = container.id;
